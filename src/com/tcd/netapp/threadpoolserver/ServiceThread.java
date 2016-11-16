@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class ServiceThread extends Thread {
@@ -55,16 +56,20 @@ public class ServiceThread extends Thread {
 
 				if (input != null) {
 					System.out.println("input from client : " + input);
-					if (input.equals("HELO text\\n")) {
-						String output = "HELO text\nIP:" + socket.getInetAddress() + "\nPort:" + socket.getPort()
+					String[] split = input.split(" ");
+
+					if (split.length > 1 && split[0].equals("HELO")) {
+						split[1] = split[1].replace("\\n", "~");
+						String output = "HELO " + split[1].split("~")[0] + "\nIP:"
+								+ InetAddress.getLocalHost().getHostAddress() + "\nPort:" + socket.getLocalPort()
 								+ "\nStudentID:12345\n";
 						outputStream.writeObject(output);
 						outputStream.flush();
 					}
 
 					else if (input.equals("KILL_SERVICE\\n")) {
-						outputStream.writeObject("Closing Service");
-						outputStream.flush();
+//						outputStream.writeObject("Closing Service");
+//						outputStream.flush();
 						System.exit(0);
 						;
 						continue;
